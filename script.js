@@ -104,12 +104,12 @@ function calculatePercentage(score, points_possible){
   }
   return score / points_possible;
 }
-
+//function to validate the assignment group
 function validateAssignmentGroup(group, CourseInfo){
   if (group.course_id !== CourseInfo.id){
     throw new Error(`Assignment Group ${group.id} does not belong to course ${CourseInfo.id}`)
   };
-  console.log(`Assignment Group ${group.id} is valid for course ${CourseInfo.id}`);
+  
 }
 try {
   validateAssignmentGroup(AssignmentGroup, CourseInfo);
@@ -133,7 +133,7 @@ function processLearnerSubmissions(LearnerSubmissions, AssignmentGroup, CourseIn
     }
     // Check if the assignment is late
     const latePenalty = isLate(submission.submission.submitted_at, assignment.due_at) ? 0.1 : 0;
-    const maxPoints = latePenalty > 0 ? assignment.points_possible * (1 - latePenalty) : assignment.points_possible;
+    let maxPoints = latePenalty > 0 ? assignment.points_possible * (1 - latePenalty) : assignment.points_possible;
     const percentage = calculatePercentage(submission.submission.score, maxPoints);
 
     if(!results[submission.learner_id]) {
@@ -151,6 +151,7 @@ function processLearnerSubmissions(LearnerSubmissions, AssignmentGroup, CourseIn
     //update totals for average calculation
     results[submission.learner_id].totalPoints += submission.submission.score;
     results[submission.learner_id].totalMaxPoints += maxPoints;
+    
 
   });
   // calculate the average score for each learner
