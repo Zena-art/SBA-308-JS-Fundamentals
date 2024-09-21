@@ -76,26 +76,50 @@ const LearnerSubmissions = [
   }
 ];
 
-function getLearnerData(course, ag, submissions) {
-  // here, we would process this data to achieve the desired result.
-  const result = [
-    {
-      id: 125,
-      avg: 0.985, // (47 + 150) / (50 + 150)
-      1: 0.94, // 47 / 50
-      2: 1.0 // 150 / 150
-    },
-    {
-      id: 132,
-      avg: 0.82, // (39 + 125) / (50 + 150)
-      1: 0.78, // 39 / 50
-      2: 0.833 // late: (140 - 15) / 150
-    }
-  ];
+// function getLearnerData(course, ag, submissions) {
+//   // here, we would process this data to achieve the desired result.
+//   const result = [
+//     {
+//       id: 125,
+//       avg: 0.985, // (47 + 150) / (50 + 150)
+//       1: 0.94, // 47 / 50
+//       2: 1.0 // 150 / 150
+//     },
+//     {
+//       id: 132,
+//       avg: 0.82, // (39 + 125) / (50 + 150)
+//       1: 0.78, // 39 / 50
+//       2: 0.833 // late: (140 - 15) / 150
+//     }
+//   ];
 
-  return result;
+//   return result;
+
+// }
+function calculatePercentage(score, points_possible){
+  if (points_possible === 0) {
+    throw new Error('Maximum points cannot be 0');
+  }
+  return score / points_possible;
+}
+const percentage = calculatePercentage(47, 50);
+console.log(percentage);
+
+function validateAssignmentGroup(group, CourseInfo){
+  if (group.course_id !== CourseInfo.id){
+    throw new Error(`Assignment Group ${group.id} does not belong to course ${CourseInfo.id}`)
+  };
+  console.log(`Assignment Group ${group.id} is valid for course ${CourseInfo.id}`);
+}
+try {
+  validateAssignmentGroup(AssignmentGroup, CourseInfo);
+} catch (error) {
+  console.error(error.message);
 }
 
-const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
+function isLate(submitted_at, due_at){
+  const submittedDate = new Date(submitted_at);
+  const dueDate = new Date(due_at);
+  return submittedDate > dueDate;
+}
 
-console.log(result);
