@@ -96,14 +96,14 @@ const LearnerSubmissions = [
 //   return result;
 
 // }
+
+// function to calculate percentage
 function calculatePercentage(score, points_possible){
   if (points_possible === 0) {
     throw new Error('Maximum points cannot be 0');
   }
   return score / points_possible;
 }
-const percentage = calculatePercentage(47, 50);
-console.log(percentage);
 
 function validateAssignmentGroup(group, CourseInfo){
   if (group.course_id !== CourseInfo.id){
@@ -123,3 +123,53 @@ function isLate(submitted_at, due_at){
   return submittedDate > dueDate;
 }
 
+function processLearnerSubmissions(LearnerSubmissions, AssignmentGroup, CourseInfo){
+  const results = {};
+  LearnerSubmissions.forEach(submission => {
+    const assignment = AssignmentGroup.assignments.find(a => a.id === submission.assignment_id);
+    if (!assignment){
+      console.warn(`Assignment ID ${submission.assignment_id} not found.`);
+      return; // skip if assignment doesn't exist
+    }
+    // Check if the assignment is late
+    const latePenalty = isLate(submission.submission.submitted_at, assignment.due_at) ? 0.1 : 0;
+    const maxPoints = latePenalty > 0 ? assignment.points_possible * (1 - latePenalty) : assignment.points_possible;
+    const percentage = calculatePercentage(submission.submission.score, maxPoints);
+
+    if(!results[submission.learner_id]) {
+      results[submission.learner_id] = {
+        id: submission.learner_id,
+        avg: 0,
+        scores: {},
+        totalPoints:0,
+        totalMaxPoints: 0
+      };
+    }
+    // store the score for this assignment 
+    results[submission.learner_id].scores[assignment.id]  = percentage;
+
+    //update totals for average calculation
+    results[submission.learner_id].totalPoints += submission.submission.score;
+    results[submission.learner_id].totalMaxPoints += maxPoints;
+
+  });
+  // calculate the average score for each learner
+  for(const learner_id in results) {
+    const learnerData = results[learner_id];
+    learnerData.avg = learnerData.totalMaxPoints ? learnerData.totalPoints / learnerData.totalMaxPoints : 0;
+
+  }
+  return Object.values(results);
+}
+const results = processLearnerSubmissions(LearnerSubmissions, AssignmentGroup, CourseInfo);
+console.log("Learner Results:", results);
+
+//main function to get learner data
+function getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions){
+//validate the assignment group 
+validateAssignmentGroup(AssignmentGroup, CourseInfo);
+
+//process learner submissions
+const results = processLearnerSubmissions(LearnerSubmissions, AssignmentGroup, CourseInfo);
+return results;
+}
