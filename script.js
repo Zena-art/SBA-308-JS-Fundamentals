@@ -129,7 +129,7 @@ function processLearnerSubmissions(LearnerSubmissions, AssignmentGroup, CourseIn
     const assignment = AssignmentGroup.assignments.find(a => a.id === submission.assignment_id);
     if (!assignment){
       console.warn(`Assignment ID ${submission.assignment_id} not found.`);
-      return; // skip if assignment doesn't exist
+      return; // skip if assignment doesn't exist, couldn't use break. It gave an error I can't use break in function
     }
     // Check if the assignment is late
     const latePenalty = isLate(submission.submission.submitted_at, assignment.due_at) ? 0.1 : 0;
